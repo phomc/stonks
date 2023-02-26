@@ -1,0 +1,41 @@
+plugins {
+    id 'java-library'
+    id 'fabric-loom' version '1.1-SNAPSHOT'
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+repositories {
+    maven { url = 'https://maven.nucleoid.xyz' }
+}
+
+dependencies {
+    minecraft 'com.mojang:minecraft:1.19.4-pre1'
+    mappings loom.officialMojangMappings()
+    modImplementation 'net.fabricmc:fabric-loader:0.14.16'
+
+    // Dependencies
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.75.1+1.19.4'
+    modImplementation include('eu.pb4:sgui:1.2.1+1.19.3')
+    implementation include('org.mongodb:mongodb-driver-reactivestreams:4.9.0')
+
+    // JUnit
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+}
+
+processResources {
+    inputs.property 'version', project.version
+
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
+    }
+}
+
+java {
+    withSourcesJar()
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

@@ -1,0 +1,12 @@
+# General
+/.gradle
+/build
+/bin
+
+# Eclipse IDE & Visual Studio Code (Eclipse JDT)
+/.classpath
+/.project
+/.settings
+
+# Fabric
+/run

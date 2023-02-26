@@ -1,0 +1,33 @@
+{
+    "schemaVersion": 1,
+    "id": "stonks",
+    "version": "${version}",
+
+    "name": "Stonks",
+    "description": "Fabric port of MangoPlex Stonks",
+    "authors": [
+        "nahkd123",
+        "StonksFabric contributors"
+    ],
+    "contact": {
+        "homepage": "https://github.com/phomc/stonks/README.md",
+        "sources": "https://github.com/phomc/stonks.git"
+    },
+
+    "license": "MIT",
+
+    "environment": "*",
+    "entrypoints": {
+        "main": ["dev.phomc.stonks.Stonks"]
+    },
+    "mixins": [
+        "stonks.mixins.json"
+    ],
+
+    "depends": {
+        "fabricloader": ">=0.14.16",
+        "fabric-api": "*",
+        "minecraft": "~1.19.3",
+        "java": ">=17"
+    }
+}
