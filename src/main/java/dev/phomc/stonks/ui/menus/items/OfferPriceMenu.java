@@ -32,7 +32,7 @@ public class OfferPriceMenu extends MarketMenu {
 
 	public OfferPriceMenu(Market market, MarketMenu previousMenu, ServerPlayer player, MarketItem item, OfferType type, int amount) {
 		super(market, previousMenu, MenuType.GENERIC_9x4, player, false);
-		setTitle(Component.translatableWithFallback("stonks.menu.item.offer.title", "Market > %s > %s > Pricing", item.item.getHoverName().getString(), type.display));
+		setTitle(Component.translatableWithFallback("stonks.menu.item.offerprice.title", "Market > %s > %s > Pricing", item.item.getHoverName().getString(), type.display));
 		this.item = item;
 		this.type = type;
 		this.amount = amount;

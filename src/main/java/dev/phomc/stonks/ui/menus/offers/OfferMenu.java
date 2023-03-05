@@ -1,5 +1,6 @@
 package dev.phomc.stonks.ui.menus.offers;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.RejectedExecutionException;
 
 import dev.phomc.stonks.markets.Market;
@@ -82,11 +83,11 @@ public class OfferMenu extends MarketMenu {
 		});
 	}
 
-	public void claim() {
+	public CompletableFuture<Void> claim() {
 		close();
 		player.sendSystemMessage(Component.literal("Claiming offer...").withStyle(ChatFormatting.GRAY));
 
-		market.service.claimItems(offer.offerId).thenAccept(amount -> {
+		return market.service.claimItems(offer.offerId).thenAccept(amount -> {
 			if (offer.type == OfferType.BUY) {
 				player.getInventory().placeItemBackInInventory(offer.item.copyWithCount(amount));
 				player.sendSystemMessage(Component.literal("Claimed " + amount + "x " + offer.item.getHoverName().getString()).withStyle(ChatFormatting.GRAY));

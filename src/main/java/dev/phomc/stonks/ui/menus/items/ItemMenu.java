@@ -34,7 +34,12 @@ public class ItemMenu extends MarketMenu {
 				.addLoreLine(Component.literal("Left click ").withStyle(ChatFormatting.YELLOW)
 						.append(Component.literal("for options").withStyle(ChatFormatting.GRAY)))
 				.addLoreLine(Component.literal("Right click ").withStyle(ChatFormatting.YELLOW)
-						.append(Component.literal("to buy x1").withStyle(ChatFormatting.GRAY))));
+						.append(Component.literal("to buy x1").withStyle(ChatFormatting.GRAY)))
+				.setCallback((idx, click, action, gui) -> {
+					InstantBuyMenu menu = new InstantBuyMenu(market, this, player, item);
+					if (click.isLeft) menu.open();
+					if (click.isRight) menu.instantBuy(1);
+				}));
 
 		setSlot(20, new GuiElementBuilder(Items.HOPPER)
 				.setName(Component.literal("Sell Instantly").withStyle(ChatFormatting.GOLD))

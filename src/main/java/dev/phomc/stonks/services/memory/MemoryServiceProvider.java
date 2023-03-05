@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 
 import dev.phomc.stonks.markets.MarketItem;
 import dev.phomc.stonks.modules.ItemsComparator;
+import dev.phomc.stonks.offers.InstantTrade;
 import dev.phomc.stonks.offers.OfferType;
 import dev.phomc.stonks.offers.OrderOffer;
 import dev.phomc.stonks.services.StonksServiceProvider;
@@ -94,6 +95,48 @@ public class MemoryServiceProvider implements StonksServiceProvider {
 	}
 
 	@Override
+	public CompletableFuture<InstantTrade> executeInstantTrade(InstantTrade trade) {
+		return Async.toAsync(() -> {
+			OfferType targetOffersWithType = trade.instantMode == OfferType.BUY? OfferType.SELL : OfferType.BUY;
+			List<OrderOffer> entries = new ArrayList<>();
+			entries.addAll(offers.values().stream()
+					.filter(v -> v.type == targetOffersWithType && (v.amount > v.filled) && comparator.isSimilar(trade.item.item, v.item))
+					.toList());
+
+			if (targetOffersWithType == OfferType.BUY) {
+				// Fill buy offers with highest PPU first
+				entries.sort((a, b) -> Double.compare(b.pricePerUnit, a.pricePerUnit));
+			} else {
+				// Fill sell offers with lowest PPU first
+				entries.sort((a, b) -> Double.compare(a.pricePerUnit, b.pricePerUnit));
+			}
+
+			for (OrderOffer entry : entries) {
+				if (trade.instantMode == OfferType.BUY) {
+					int canPay = (int) Math.floor(trade.budget / entry.pricePerUnit); // how many items we can pay for
+					int itemsNeeded = Math.min(entry.amount - entry.filled, trade.amount); // how many items we needed from this offer
+					int chooseToPay = Math.min(canPay, itemsNeeded); // how many items we can get
+
+					trade.amount -= chooseToPay;
+					trade.budget -= chooseToPay * entry.pricePerUnit;
+					entry.filled += chooseToPay;
+
+					if (trade.amount == 0) break;
+					if (chooseToPay != itemsNeeded) break; // we ran out of money?
+				} else {
+					int itemsSold = Math.min(entry.amount - entry.filled, trade.amount);
+					trade.amount -= itemsSold;
+					trade.budget += itemsSold * entry.pricePerUnit;
+
+					if (trade.amount == 0) break;
+				}
+			}
+
+			return trade;
+		});
+	}
+
+	@Override
 	public CompletableFuture<Void> updateProductQuickInfo(MarketItem item) {
 		if (item.isUpdating) return CompletableFuture.completedFuture(null);
 
@@ -107,10 +150,10 @@ public class MemoryServiceProvider implements StonksServiceProvider {
 			List<OrderOffer> sellEntries = new ArrayList<>();
 
 			buyEntries.addAll(entries.stream().filter(v -> v.type == OfferType.BUY).toList());
-			buyEntries.sort((a, b) -> Double.compare(a.pricePerUnit, b.pricePerUnit));
+			buyEntries.sort((a, b) -> Double.compare(b.pricePerUnit, a.pricePerUnit));
 
 			sellEntries.addAll(entries.stream().filter(v -> v.type == OfferType.SELL).toList());
-			sellEntries.sort((a, b) -> Double.compare(b.pricePerUnit, a.pricePerUnit));
+			sellEntries.sort((a, b) -> Double.compare(a.pricePerUnit, b.pricePerUnit));
 
 			int instantBuyCount = 0, instantSellCount = 0;
 			double instantBuySum = 0, instantSellSum = 0;

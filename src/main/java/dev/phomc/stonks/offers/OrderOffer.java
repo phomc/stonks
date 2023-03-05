@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import dev.phomc.stonks.markets.TempPlayerData;
 import dev.phomc.stonks.modules.ItemIdsConverter;
 import dev.phomc.stonks.ui.menus.MarketMenu;
 import dev.phomc.stonks.ui.menus.offers.OfferMenu;
@@ -64,7 +65,7 @@ public class OrderOffer {
 		return new GuiElementBuilder(item.getItem())
 				.setName(Component.empty()
 						.append(item.getHoverName())
-						.append(Component.literal(full? " FULL" : (" (" + filled + "/" + amount + ")"))
+						.append(Component.literal(full? " FULL" : (" (" + claimed + "/" + filled + "/" + amount + ")"))
 								.withStyle(s -> s.withColor(full? ChatFormatting.GREEN : ChatFormatting.GRAY).withBold(full)))
 						.append(Component.literal(expired? " EXPIRED" : "")
 								.withStyle(s -> s.withColor(ChatFormatting.RED).withBold(true))))
@@ -75,11 +76,20 @@ public class OrderOffer {
 				.addLoreLine(Component.empty())
 				.addLoreLine(Component.empty().withStyle(ChatFormatting.GRAY)
 						.append(Component.literal("Click ").withStyle(ChatFormatting.GOLD))
-						.append("for details"))
+						.append(filled >= amount? "to claim all" : "for details"))
 				.setCallback((idx, click, action, gui) -> {
 					if (gui instanceof MarketMenu mm) {
 						OfferMenu menu = new OfferMenu(mm.market, mm, mm.getPlayer(), this);
-						menu.open();
+
+						if (filled >= amount) {
+							menu.claim().thenRun(() -> {
+								TempPlayerData temp = mm.market.getTemporaryData(mm.getPlayer());
+								temp.offers.removeIf(v -> v.offerId == offerId);
+								mm.market.updateOffersList(temp, true);
+							});
+						} else {
+							menu.open();
+						}
 					}
 				})
 				.build();

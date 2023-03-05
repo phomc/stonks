@@ -24,7 +24,7 @@ public class OfferCreateMenu extends MarketMenu {
 
 	public OfferCreateMenu(Market market, MarketMenu previousMenu, ServerPlayer player, MarketItem item, OfferType type) {
 		super(market, previousMenu, MenuType.GENERIC_9x4, player, false);
-		setTitle(Component.translatableWithFallback("stonks.menu.item.offer.title", "Market > %s > %s", item.item.getHoverName().getString(), type.display));
+		setTitle(Component.translatableWithFallback("stonks.menu.item.offeramount.title", "Market > %s > %s", item.item.getHoverName().getString(), type.display));
 		this.item = item;
 		this.type = type;
 
