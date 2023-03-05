@@ -2,6 +2,7 @@ package dev.phomc.stonks.ui.menus.items;
 
 import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.MarketItem;
+import dev.phomc.stonks.offers.InstantTrade;
 import dev.phomc.stonks.offers.OfferType;
 import dev.phomc.stonks.ui.menus.MarketMenu;
 import dev.phomc.stonks.utils.DisplayUtils;
@@ -75,5 +76,42 @@ public class ItemMenu extends MarketMenu {
 
 	public void instantSellAll() {
 		if (instantSold) return;
+		instantSold = true;
+
+		setSlot(20, new GuiElementBuilder(Items.GRAY_STAINED_GLASS_PANE)
+				.setName(Component.literal("Please wait...").withStyle(ChatFormatting.GRAY)));
+
+		int count2nd = market.itemsComparator.countInContainers(item.item, getPlayer().getInventory());
+		if (count2nd < availableForSale) {
+			getPlayer().sendSystemMessage(Component.literal("Failed to place offer: Items magically disappeared").withStyle(ChatFormatting.RED));
+			return;
+		}
+
+		market.itemsComparator.removeInContainers(item.item, getPlayer().getInventory(), availableForSale);
+		InstantTrade trade = InstantTrade.instantSell(item, availableForSale);
+
+		market.service.executeInstantTrade(trade).thenAccept(trade2 -> {
+			market.currency.send(player.getUUID(), trade2.budget).thenRun(() -> {
+				setSlot(20, new GuiElementBuilder(Items.LIME_STAINED_GLASS_PANE)
+						.setName(Component.literal("Items sold!").withStyle(ChatFormatting.GREEN)));
+
+				if (trade2.amount == 0) {
+					player.sendSystemMessage(Component.literal("You've sold " + availableForSale + "x " + item.item.getHoverName().getString() + " for " + DisplayUtils.PRICE_FORMATTER.format(trade2.budget) + ".").withStyle(ChatFormatting.GRAY));
+				} else {
+					player.getInventory().placeItemBackInInventory(item.item.copyWithCount(trade2.amount));
+					player.sendSystemMessage(Component.literal("You've sold " + (availableForSale - trade2.amount) + "x " + item.item.getHoverName().getString() + " for " + DisplayUtils.PRICE_FORMATTER.format(trade2.budget) + ", but " + trade2.amount + " items can't be sold. ").withStyle(ChatFormatting.YELLOW)
+							.append(Component.literal("(Not enough demand?)").withStyle(ChatFormatting.GRAY)));
+				}
+			}).exceptionally(t -> {
+				t.printStackTrace();
+				player.sendSystemMessage(Component.literal("Unable to send " + DisplayUtils.PRICE_FORMATTER.format(trade2.budget) + "to your purse. Please contact an administrator.").withStyle(ChatFormatting.RED));
+				return null;
+			});
+		}).exceptionally(t -> {
+			t.printStackTrace();
+			player.getInventory().placeItemBackInInventory(item.item.copyWithCount(availableForSale));
+			player.sendSystemMessage(Component.literal("Unable to execute instant sell request. Please contact an administrator.").withStyle(ChatFormatting.RED));
+			return null;
+		});
 	}
 }

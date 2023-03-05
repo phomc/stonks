@@ -90,6 +90,15 @@ public class MemoryServiceProvider implements StonksServiceProvider {
 
 			int delta = offer.filled - offer.claimed;
 			offer.claimed = offer.filled;
+
+			if (offer.claimed == offer.amount) {
+				offers.remove(offerId);
+
+				List<OrderOffer> playerOffers = offersPerPlayer.get(offer.playerId);
+				if (playerOffers == null) offersPerPlayer.put(offer.playerId, playerOffers = new ArrayList<>());
+				playerOffers.removeIf(v -> v.offerId.equals(offerId));
+			}
+
 			return delta;
 		});
 	}
@@ -127,6 +136,7 @@ public class MemoryServiceProvider implements StonksServiceProvider {
 					int itemsSold = Math.min(entry.amount - entry.filled, trade.amount);
 					trade.amount -= itemsSold;
 					trade.budget += itemsSold * entry.pricePerUnit;
+					entry.filled += itemsSold;
 
 					if (trade.amount == 0) break;
 				}

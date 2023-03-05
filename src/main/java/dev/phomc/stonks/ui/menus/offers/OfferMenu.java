@@ -64,17 +64,35 @@ public class OfferMenu extends MarketMenu {
 			double money = delta * updatedOffer.pricePerUnit;
 
 			if (offer.type == OfferType.BUY) {
-				market.currency.send(player.getUUID(), money).thenAccept($_ -> {
+				market.currency.send(player.getUUID(), money).thenRun(() -> {
 					market.getTemporaryData(player).offers.removeIf(v -> v.offerId.equals(offer.offerId));
 					player.sendSystemMessage(Component.translatableWithFallback("stonks.messages.cancelledOffer", "Cancelled offer for %s!", offer.item.getHoverName().getString()).withStyle(ChatFormatting.GRAY));
 				}).exceptionally(t -> {
 					throw new RejectedExecutionException(t);
 				});
+
+				if (updatedOffer.claimed < updatedOffer.filled) {
+					int claimAmount = updatedOffer.filled - updatedOffer.claimed;
+					player.getInventory().placeItemBackInInventory(offer.item.copyWithCount(claimAmount));
+					player.sendSystemMessage(Component.literal("You received " + claimAmount + "x " + updatedOffer.item.getHoverName().getString() + " (unclaimed items)").withStyle(ChatFormatting.GRAY));
+				}
 			}
+
 			if (offer.type == OfferType.SELL) {
 				player.getInventory().placeItemBackInInventory(offer.item.copyWithCount(delta));
 				market.getTemporaryData(player).offers.removeIf(v -> v.offerId.equals(offer.offerId));
 				player.sendSystemMessage(Component.translatableWithFallback("stonks.messages.cancelledOffer", "Cancelled offer for %s!", offer.item.getHoverName().getString()).withStyle(ChatFormatting.GRAY));
+
+				if (updatedOffer.claimed < updatedOffer.filled) {
+					double claimMoney = (updatedOffer.filled - updatedOffer.claimed) * updatedOffer.pricePerUnit;
+					market.currency.send(player.getUUID(), claimMoney).thenRun(() -> {
+						player.sendSystemMessage(Component.literal("You received " + claimMoney + " (unclaimed money)").withStyle(ChatFormatting.GRAY));
+					}).exceptionally(t -> {
+						t.printStackTrace();
+						player.sendSystemMessage(Component.literal("Unable to send unclaimed money. Please contact an administrator.").withStyle(ChatFormatting.RED));
+						return null;
+					});
+				}
 			}
 		}).exceptionally(t -> {
 			player.sendSystemMessage(Component.translatableWithFallback("stonks.messages.cancelFailure", "Failed to cancel offer for %s", offer.item.getHoverName().getString()).withStyle(ChatFormatting.RED));

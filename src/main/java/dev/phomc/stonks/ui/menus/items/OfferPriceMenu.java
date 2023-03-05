@@ -169,14 +169,16 @@ public class OfferPriceMenu extends MarketMenu {
 	public void setCustomPrice(Double price) {
 		this.customPrice = price;
 		GuiElementBuilder builder = new GuiElementBuilder(Items.DARK_OAK_SIGN)
-				.setName(Component.literal("Custom " + (price != null? ("(" + DisplayUtils.PRICE_FORMATTER.format(price) + ")") : "price per unit")).withStyle(ChatFormatting.GOLD))
-				.addLoreLine(Component.empty());
+				.setName(Component.literal("Custom " + (price != null? ("(" + DisplayUtils.PRICE_FORMATTER.format(price) + ")") : "price per unit")).withStyle(ChatFormatting.GOLD));
 
 		if (price == null) {
+			builder.addLoreLine(Component.empty());
 			builder.addLoreLine(Component.literal("Click ").withStyle(ChatFormatting.YELLOW)
 					.append(Component.literal("to set price").withStyle(ChatFormatting.GRAY)));
 			builder.setCallback(() -> openCustomPriceGui());
 		} else {
+			builder.addLoreLine(DisplayUtils.labeledValue("Total: ", price * amount));
+			builder.addLoreLine(Component.empty());
 			builder.addLoreLine(Component.literal("Left click ").withStyle(ChatFormatting.YELLOW)
 					.append("to confirm"));
 			builder.addLoreLine(Component.literal("Right click ").withStyle(ChatFormatting.YELLOW)
