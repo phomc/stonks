@@ -4,7 +4,7 @@ import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.MarketItem;
 import dev.phomc.stonks.offers.InstantTrade;
 import dev.phomc.stonks.ui.menus.MarketMenu;
-import dev.phomc.stonks.ui.menus.SignInput;
+import dev.phomc.stonks.ui.SignInput;
 import dev.phomc.stonks.utils.DisplayUtils;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;

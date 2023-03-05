@@ -1,5 +1,6 @@
-package dev.phomc.stonks.ui.menus;
+package dev.phomc.stonks.ui;
 
+import dev.phomc.stonks.ui.menus.MarketMenu;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.ChatFormatting;

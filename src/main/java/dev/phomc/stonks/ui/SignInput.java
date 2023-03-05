@@ -1,4 +1,4 @@
-package dev.phomc.stonks.ui.menus;
+package dev.phomc.stonks.ui;
 
 import java.util.function.Consumer;
 

@@ -1,6 +1,7 @@
 package dev.phomc.stonks.ui.menus;
 
 import dev.phomc.stonks.markets.Market;
+import dev.phomc.stonks.ui.CommonElements;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuType;

@@ -8,7 +8,7 @@ import dev.phomc.stonks.markets.MarketItem;
 import dev.phomc.stonks.offers.OfferType;
 import dev.phomc.stonks.offers.OrderOffer;
 import dev.phomc.stonks.ui.menus.MarketMenu;
-import dev.phomc.stonks.ui.menus.SignInput;
+import dev.phomc.stonks.ui.SignInput;
 import dev.phomc.stonks.utils.DisplayUtils;
 import dev.phomc.stonks.utils.GeneralConverter;
 import eu.pb4.sgui.api.elements.GuiElement;

@@ -3,6 +3,7 @@ package dev.phomc.stonks.ui.menus;
 import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.MarketCategory;
 import dev.phomc.stonks.markets.MarketItem;
+import dev.phomc.stonks.ui.CommonElements;
 import dev.phomc.stonks.ui.menus.items.ItemMenu;
 import dev.phomc.stonks.ui.menus.offers.OffersListMenu;
 import eu.pb4.sgui.api.elements.GuiElement;
