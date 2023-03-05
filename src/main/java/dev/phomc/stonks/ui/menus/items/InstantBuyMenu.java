@@ -4,6 +4,7 @@ import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.MarketItem;
 import dev.phomc.stonks.offers.InstantTrade;
 import dev.phomc.stonks.ui.menus.MarketMenu;
+import dev.phomc.stonks.ui.menus.SignInput;
 import dev.phomc.stonks.utils.DisplayUtils;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
@@ -11,11 +12,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 
 public class InstantBuyMenu extends MarketMenu {
 	private MarketItem item;
+	private int customAmount = -1;
 
 	public InstantBuyMenu(Market market, MarketMenu previousMenu, ServerPlayer player, MarketItem item) {
 		super(market, previousMenu, MenuType.GENERIC_9x4, player, false);
@@ -29,6 +33,8 @@ public class InstantBuyMenu extends MarketMenu {
 		setSlot(21, presetButton(32));
 		setSlot(22, presetButton(64));
 		setSlot(23, presetButton(64 * 2));
+
+		setCustomAmount(-1);
 	}
 
 	private GuiElement presetButton(int amount) {
@@ -46,6 +52,62 @@ public class InstantBuyMenu extends MarketMenu {
 				.setCallback(() -> instantBuy(amount));
 
 		return builder.build();
+	}
+
+	public void setCustomAmount(int amount) {
+		this.customAmount = amount;
+
+		GuiElementBuilder builder = new GuiElementBuilder(Items.DIAMOND)
+				.setName(Component.literal("Custom" + (amount != -1? (" (" + amount + " item" + (amount == 1? "" : "s") + ")") : "")).withStyle(ChatFormatting.GOLD))
+				.addLoreLine(Component.literal("Instant buy").withStyle(ChatFormatting.DARK_GRAY));
+
+		if (amount == -1) {
+			builder.addLoreLine(Component.empty());
+			builder.addLoreLine(Component.literal("Click ").withStyle(ChatFormatting.YELLOW)
+					.append(Component.literal("to set custom amount").withStyle(ChatFormatting.GRAY)));
+			builder.setCallback(() -> openCustomAmountGui());
+		} else {
+			builder.addLoreLine(Component.empty());
+			builder.addLoreLine(DisplayUtils.labeledValue("Estimated cost: ", item.instantBuy != null? (item.instantBuy * customAmount) : null));
+			builder.addLoreLine(Component.empty());
+			builder.addLoreLine(Component.literal("Left click ").withStyle(ChatFormatting.YELLOW)
+					.append(Component.literal("to buy").withStyle(ChatFormatting.GRAY)));
+			builder.addLoreLine(Component.literal("Right click ").withStyle(ChatFormatting.YELLOW)
+					.append(Component.literal("to change amount").withStyle(ChatFormatting.GRAY)));
+			builder.setCallback((idx, click, action, gui) -> {
+				if (click.isLeft) instantBuy(customAmount);
+				if (click.isRight) openCustomAmountGui();
+			});
+		}
+
+		setSlot(25, builder);
+	}
+
+	public void openCustomAmountGui() {
+		SignInput input = new SignInput(player, str -> {
+			try {
+				int amount2 = Integer.parseInt(str);
+
+				if (amount2 <= 0) {
+					player.sendSystemMessage(Component.literal("You can only buy with at least 1 item.").withStyle(ChatFormatting.RED));
+					InstantBuyMenu.this.open();
+				} else {
+					setCustomAmount(amount2);
+					InstantBuyMenu.this.open();
+				}
+			} catch (NumberFormatException t) {
+				player.sendSystemMessage(Component.literal("That doesn't look like a number to me...").withStyle(ChatFormatting.RED));
+				InstantBuyMenu.this.open();
+			}
+		});
+
+		if (customAmount > 0) input.setLine(0, Component.literal("" + customAmount));
+		input.setLine(1, Component.literal("\u00AF\u00AF\u00AF\u00AF\u00AF\u00AF\u00AF\u00AF\u00AF\u00AF"));
+		input.setLine(2, Component.literal("Please type how much you want"));
+		input.setLine(3, Component.literal("to buy above"));
+		input.setColor(DyeColor.WHITE);
+		input.setSignType(Blocks.DARK_OAK_SIGN);
+		input.open();
 	}
 
 	public void instantBuy(int amount) {
