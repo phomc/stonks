@@ -71,11 +71,14 @@ public class OrderOffer {
 								.withStyle(s -> s.withColor(ChatFormatting.RED).withBold(true))))
 				.addLoreLine(Component.empty().withStyle(ChatFormatting.DARK_GRAY).append(type.display))
 				.addLoreLine(Component.empty())
+				.addLoreLine(Component.literal("Progress: ").withStyle(ChatFormatting.GRAY)
+						.append(DisplayUtils.progressBar(((double) filled) / amount))
+						.append(" " + (filled * 100 / amount) + "%"))
 				.addLoreLine(Component.literal(amount + " item" + (amount != 1? "s" : "") + " @ " + DisplayUtils.PRICE_FORMATTER.format(pricePerUnit) + "/ea").withStyle(ChatFormatting.GRAY))
 				.addLoreLine(Component.literal(DisplayUtils.PRICE_FORMATTER.format(amount * pricePerUnit) + " total").withStyle(ChatFormatting.GRAY))
 				.addLoreLine(Component.empty())
 				.addLoreLine(Component.empty().withStyle(ChatFormatting.GRAY)
-						.append(Component.literal("Click ").withStyle(ChatFormatting.GOLD))
+						.append(Component.literal("Click ").withStyle(ChatFormatting.YELLOW))
 						.append(filled >= amount? "to claim all" : "for details"))
 				.setCallback((idx, click, action, gui) -> {
 					if (gui instanceof MarketMenu mm) {
