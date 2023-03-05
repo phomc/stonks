@@ -11,6 +11,9 @@ import org.bson.types.ObjectId;
 
 import com.google.common.base.Preconditions;
 
+import dev.phomc.stonks.markets.MarketItem;
+import dev.phomc.stonks.modules.ItemsComparator;
+import dev.phomc.stonks.offers.OfferType;
 import dev.phomc.stonks.offers.OrderOffer;
 import dev.phomc.stonks.services.StonksServiceProvider;
 import dev.phomc.stonks.utils.Async;
@@ -23,6 +26,8 @@ import dev.phomc.stonks.utils.Async;
 public class MemoryServiceProvider implements StonksServiceProvider {
 	private final Map<ObjectId, OrderOffer> offers = new HashMap<>();
 	private final Map<UUID, List<OrderOffer>> offersPerPlayer = new HashMap<>();
+
+	public ItemsComparator comparator = ItemsComparator.DEFAULT_COMPARATOR;
 
 	@Override
 	public CompletableFuture<OrderOffer> getOffer(ObjectId offerId) {
@@ -48,6 +53,7 @@ public class MemoryServiceProvider implements StonksServiceProvider {
 	public CompletableFuture<Void> makeOffer(OrderOffer offer) {
 		return Async.toAsync(() -> {
 			Preconditions.checkNotNull(offer);
+			if (offer.offerId == null) offer.offerId = ObjectId.get();
 
 			if (offers.containsKey(offer.offerId)) throw new IllegalArgumentException("offer id " + offer.offerId + " already exists!");
 			List<OrderOffer> playerOffers = offersPerPlayer.get(offer.playerId);
@@ -59,7 +65,7 @@ public class MemoryServiceProvider implements StonksServiceProvider {
 	}
 
 	@Override
-	public CompletableFuture<Void> cancelOffer(ObjectId offerId) {
+	public CompletableFuture<OrderOffer> cancelOffer(ObjectId offerId) {
 		return Async.toAsync(() -> {
 			Preconditions.checkNotNull(offerId);
 
@@ -69,6 +75,67 @@ public class MemoryServiceProvider implements StonksServiceProvider {
 			List<OrderOffer> playerOffers = offersPerPlayer.get(offer.playerId);
 			if (playerOffers == null) offersPerPlayer.put(offer.playerId, playerOffers = new ArrayList<>());
 			playerOffers.removeIf(v -> v.offerId.equals(offerId));
+			return offer;
+		});
+	}
+
+	@Override
+	public CompletableFuture<Integer> claimItems(ObjectId offerId) {
+		return Async.toAsync(() -> {
+			Preconditions.checkNotNull(offerId);
+
+			OrderOffer offer = offers.get(offerId);
+			if (offer == null) throw new NullPointerException("Offer with id = " + offerId + " does not exists");
+
+			int delta = offer.filled - offer.claimed;
+			offer.claimed = offer.filled;
+			return delta;
+		});
+	}
+
+	@Override
+	public CompletableFuture<Void> updateProductQuickInfo(MarketItem item) {
+		if (item.isUpdating) return CompletableFuture.completedFuture(null);
+
+		return Async.toAsync(() -> {
+			item.isUpdating = true;
+
+			// TODO: better way to update values
+			// We likely are going to propagate data right inside MongoDB server
+			List<OrderOffer> entries = offers.values().stream().filter(v -> comparator.isSimilar(item.item, v.item)).toList();
+			List<OrderOffer> buyEntries = new ArrayList<>();
+			List<OrderOffer> sellEntries = new ArrayList<>();
+
+			buyEntries.addAll(entries.stream().filter(v -> v.type == OfferType.BUY).toList());
+			buyEntries.sort((a, b) -> Double.compare(a.pricePerUnit, b.pricePerUnit));
+
+			sellEntries.addAll(entries.stream().filter(v -> v.type == OfferType.SELL).toList());
+			sellEntries.sort((a, b) -> Double.compare(b.pricePerUnit, a.pricePerUnit));
+
+			int instantBuyCount = 0, instantSellCount = 0;
+			double instantBuySum = 0, instantSellSum = 0;
+			double instantBuyTop = Double.POSITIVE_INFINITY, instantSellTop = 0;
+
+			for (int i = 0; i < Math.min(10, buyEntries.size()); i++) {
+				OrderOffer entry = buyEntries.get(i);
+				instantSellCount += entry.amount;
+				instantSellSum += entry.amount * entry.pricePerUnit;
+				if (entry.pricePerUnit > instantSellTop) instantSellTop = entry.pricePerUnit;
+			}
+
+			for (int i = 0; i < Math.min(10, sellEntries.size()); i++) {
+				OrderOffer entry = sellEntries.get(i);
+				instantBuyCount += entry.amount;
+				instantBuySum += entry.amount * entry.pricePerUnit;
+				if (entry.pricePerUnit < instantBuyTop) instantBuyTop = entry.pricePerUnit;
+			}
+
+			item.instantBuy = instantBuyCount == 0? null : instantBuyTop;
+			item.instantSell = instantSellCount == 0? null : instantSellTop;
+			item.avgInstantBuy = instantBuyCount == 0? null : instantBuySum / instantBuyCount;
+			item.avgInstantSell = instantSellCount == 0? null : instantSellSum / instantSellCount;
+
+			item.isUpdating = false;
 		});
 	}
 }

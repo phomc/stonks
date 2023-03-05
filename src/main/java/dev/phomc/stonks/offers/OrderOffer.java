@@ -6,10 +6,10 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import dev.phomc.stonks.modules.ItemIdsConverter;
-import dev.phomc.stonks.ui.menus.CommonElements;
 import dev.phomc.stonks.ui.menus.MarketMenu;
-import dev.phomc.stonks.ui.menus.OfferMenu;
-import dev.phomc.stonks.utils.UUIDConverter;
+import dev.phomc.stonks.ui.menus.offers.OfferMenu;
+import dev.phomc.stonks.utils.DisplayUtils;
+import dev.phomc.stonks.utils.GeneralConverter;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.ChatFormatting;
@@ -25,7 +25,7 @@ public class OrderOffer {
 	public final long expireOn;
 
 	public ObjectId offerId;
-	public int filled = 0;
+	public int filled = 0, claimed = 0;
 
 	public OrderOffer(UUID playerId, OfferType type, ItemStack item, int amount, double pricePerUnit, long expireOn) {
 		this.playerId = playerId;
@@ -39,13 +39,14 @@ public class OrderOffer {
 	public OrderOffer(Document doc, ItemIdsConverter itemIds) {
 		if (doc.containsKey("_id")) offerId = doc.getObjectId("_id");
 
-		playerId = UUIDConverter.fromDashless(doc.getString("player"));
+		playerId = GeneralConverter.uuidFromDashless(doc.getString("player"));
 		type = OfferType.valueOf(doc.getString("type"));
 		item = itemIds.toItemStack(doc.getString("item"));
 		amount = doc.getInteger("amount", 0);
 		pricePerUnit = doc.getDouble("pricePerUnit").doubleValue();
 		expireOn = doc.getLong("expireOn");
 		filled = doc.getInteger("filled", 0);
+		claimed = doc.getInteger("claimed", 0);
 	}
 
 	public boolean isExpired() {
@@ -69,8 +70,8 @@ public class OrderOffer {
 								.withStyle(s -> s.withColor(ChatFormatting.RED).withBold(true))))
 				.addLoreLine(Component.empty().withStyle(ChatFormatting.DARK_GRAY).append(type.display))
 				.addLoreLine(Component.empty())
-				.addLoreLine(Component.literal(amount + " item" + (amount != 1? "s" : "") + " @ " + CommonElements.PRICE_FORMATTER.format(pricePerUnit) + "/ea").withStyle(ChatFormatting.GRAY))
-				.addLoreLine(Component.literal(CommonElements.PRICE_FORMATTER.format(amount * pricePerUnit) + " total").withStyle(ChatFormatting.GRAY))
+				.addLoreLine(Component.literal(amount + " item" + (amount != 1? "s" : "") + " @ " + DisplayUtils.PRICE_FORMATTER.format(pricePerUnit) + "/ea").withStyle(ChatFormatting.GRAY))
+				.addLoreLine(Component.literal(DisplayUtils.PRICE_FORMATTER.format(amount * pricePerUnit) + " total").withStyle(ChatFormatting.GRAY))
 				.addLoreLine(Component.empty())
 				.addLoreLine(Component.empty().withStyle(ChatFormatting.GRAY)
 						.append(Component.literal("Click ").withStyle(ChatFormatting.GOLD))
@@ -85,12 +86,13 @@ public class OrderOffer {
 	}
 
 	public Document createNewOfferDocument(ItemIdsConverter itemIds) {
-		return new Document("player", UUIDConverter.toDashless(playerId))
+		return new Document("player", GeneralConverter.uuidToDashless(playerId))
 				.append("type", type.toString())
 				.append("item", itemIds.fromItemStack(item))
 				.append("amount", amount)
 				.append("pricePerUnit", pricePerUnit)
 				.append("expireOn", expireOn)
-				.append("filled", filled);
+				.append("filled", filled)
+				.append("claimed", claimed);
 	}
 }

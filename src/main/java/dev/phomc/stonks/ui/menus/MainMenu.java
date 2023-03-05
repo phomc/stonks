@@ -3,6 +3,7 @@ package dev.phomc.stonks.ui.menus;
 import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.MarketCategory;
 import dev.phomc.stonks.markets.MarketItem;
+import dev.phomc.stonks.ui.menus.offers.OffersListMenu;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.ChatFormatting;
@@ -25,9 +26,6 @@ public class MainMenu extends MarketMenu {
 		super(market, previousMenu, MenuType.GENERIC_9x6, player, false);
 		setTitle(Component.translatableWithFallback("stonks.menu.main.title", "Market"));
 		this.selectedCategory = market.getTemporaryData(player).selectedCategory;
-
-		for (int i = 0; i < 9; i++) setSlot(i, CommonElements.EMPTY);
-		if (previousMenu != null) setSlot(1, CommonElements.PREV_PAGE);
 
 		setSlot(3, new GuiElementBuilder(Items.GOLD_INGOT)
 				.setName(Component.literal("Sell all").withStyle(ChatFormatting.YELLOW))
@@ -88,8 +86,21 @@ public class MainMenu extends MarketMenu {
 				if (i == (7 * 2 + 3)) setSlot(slot, UNSELECTED);
 			} else if (i < selectedCategory.items.size()) {
 				MarketItem item = selectedCategory.items.get(i);
+				market.updateQuickInfo(item, false);
 				setSlot(slot, item.buildElement());
 			}
+		}
+	}
+
+	// Internal update clock
+	private int ticked = 0;
+
+	@Override
+	public void onTick() {
+		ticked++;
+		if (ticked > 20 * 10) {
+			ticked = 0;
+			drawCategoryView();
 		}
 	}
 }

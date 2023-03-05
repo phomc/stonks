@@ -13,5 +13,8 @@ public abstract class MarketMenu extends SimpleGui {
 		super(type, player, manipulatePlayerSlots);
 		this.market = market;
 		this.previousMenu = previousMenu;
+
+		for (int i = 0; i < 9; i++) setSlot(i, CommonElements.EMPTY);
+		if (previousMenu != null) setSlot(1, CommonElements.PREV_PAGE);
 	}
 }

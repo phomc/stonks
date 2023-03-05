@@ -1,7 +1,8 @@
-package dev.phomc.stonks.ui.menus;
+package dev.phomc.stonks.ui.menus.offers;
 
 import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.TempPlayerData;
+import dev.phomc.stonks.ui.menus.MarketMenu;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.ChatFormatting;
@@ -24,9 +25,6 @@ public class OffersListMenu extends MarketMenu {
 		setTitle(Component.translatableWithFallback("stonks.menu.myoffers.title", "Market > My Offers"));
 		this.temporaryData = market.getTemporaryData(player);
 		this.nextUpdateTimestamp = this.temporaryData.nextOffersListUpdate;
-
-		for (int i = 0; i < 9; i++) setSlot(i, CommonElements.EMPTY);
-		if (previousMenu != null) setSlot(1, CommonElements.PREV_PAGE);
 
 		drawOffers();
 	}
