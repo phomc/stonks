@@ -28,6 +28,10 @@ public class ItemMenu extends MarketMenu {
 		setSlot(4, new GuiElement(item.item, (idx, click, action, gui) -> {}));
 		setSlot(22, new GuiElement(item.item, (idx, click, action, gui) -> {}));
 
+		drawButtons();
+	}
+
+	public void drawButtons() {
 		setSlot(19, new GuiElementBuilder(Items.GOLD_INGOT)
 				.setName(Component.literal("Buy Instantly").withStyle(ChatFormatting.GOLD))
 				.addLoreLine(DisplayUtils.labeledValue("Instant Buy Price: ", item.avgInstantBuy))
@@ -113,5 +117,17 @@ public class ItemMenu extends MarketMenu {
 			player.sendSystemMessage(Component.literal("Unable to execute instant sell request. Please contact an administrator.").withStyle(ChatFormatting.RED));
 			return null;
 		});
+	}
+
+	private int ticked = 0;
+
+	@Override
+	public void onTick() {
+		ticked++;
+
+		if (ticked >= 100) {
+			market.updateQuickInfo(item, false);
+			drawButtons();
+		}
 	}
 }
