@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Items;
 
-public class MyOffersMenu extends MarketMenu {
+public class OffersListMenu extends MarketMenu {
 	private static final GuiElement LOADING = new GuiElementBuilder(Items.GRAY_STAINED_GLASS_PANE)
 			.setName(Component.literal("Loading...").withStyle(ChatFormatting.GRAY))
 			.build();
@@ -19,7 +19,7 @@ public class MyOffersMenu extends MarketMenu {
 	private long nextUpdateTimestamp;
 	private int currentPage = 0;
 
-	public MyOffersMenu(Market market, MarketMenu previousMenu, ServerPlayer player) {
+	public OffersListMenu(Market market, MarketMenu previousMenu, ServerPlayer player) {
 		super(market, previousMenu, MenuType.GENERIC_9x6, player, false);
 		setTitle(Component.translatableWithFallback("stonks.menu.myoffers.title", "Market > My Offers"));
 		this.temporaryData = market.getTemporaryData(player);

@@ -42,7 +42,7 @@ public class MainMenu extends MarketMenu {
 						.append(Component.literal("Click ").withStyle(ChatFormatting.GOLD))
 						.append(Component.literal("to view your offers")))
 				.setCallback((idx, click, action, gui) -> {
-					MyOffersMenu myOffers = new MyOffersMenu(market, this, player);
+					OffersListMenu myOffers = new OffersListMenu(market, this, player);
 					myOffers.open();
 				}));
 
