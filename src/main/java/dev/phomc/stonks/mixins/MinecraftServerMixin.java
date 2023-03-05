@@ -14,7 +14,8 @@ import com.mojang.datafixers.DataFixer;
 import dev.phomc.stonks.Stonks;
 import dev.phomc.stonks.bridges.MinecraftServerBridge;
 import dev.phomc.stonks.markets.Market;
-import dev.phomc.stonks.services.memory.MemoryServiceProvider;
+import dev.phomc.stonks.services.StonksService;
+import dev.phomc.stonks.services.memory.MemoryService;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
@@ -30,7 +31,21 @@ public abstract class MinecraftServerMixin implements MinecraftServerBridge {
 	private void onInit(Thread thread, LevelStorageSource.LevelStorageAccess worldStorage, PackRepository packs, WorldStem worldStem,
 			Proxy proxy, DataFixer df, Services services, ChunkProgressListenerFactory chunkProgress, CallbackInfo ci) {
 		long initStart = System.nanoTime();
-		market = Market.createDefaultMarket(new MemoryServiceProvider());
+
+		StonksService service = Stonks.FIND_SERVICE.invoker().findServiceProvider(null);
+		if (service == null) {
+			Stonks.LOGGER.warn("Stonks couldn't find any service provider. Do you have any providers installed? Failback to memory-based service...");
+			Stonks.LOGGER.warn("Memory-based service will erases everything when the world is unloaded.");
+			service = new MemoryService();
+		}
+
+		market = new Market(service);
+		Stonks.CONFIGURE_MARKET.invoker().configure(market);
+		if (market.categories.size() == 0) {
+			Stonks.LOGGER.warn("No categories for market. Using default categories set.");
+			Market.setupDefaults(market);
+		}
+
 		Stonks.LOGGER.info("Stonks initialized in {}ms", new DecimalFormat("#,##0.##").format((System.nanoTime() - initStart) / 1_000_000D));
 	}
 

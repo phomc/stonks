@@ -16,7 +16,7 @@ import dev.phomc.stonks.modules.ItemsComparator;
 import dev.phomc.stonks.offers.InstantTrade;
 import dev.phomc.stonks.offers.OfferType;
 import dev.phomc.stonks.offers.OrderOffer;
-import dev.phomc.stonks.services.StonksServiceProvider;
+import dev.phomc.stonks.services.StonksService;
 import dev.phomc.stonks.utils.Async;
 
 /**
@@ -24,7 +24,7 @@ import dev.phomc.stonks.utils.Async;
  * @author nahkd
  *
  */
-public class MemoryServiceProvider implements StonksServiceProvider {
+public class MemoryService implements StonksService {
 	private final Map<ObjectId, OrderOffer> offers = new HashMap<>();
 	private final Map<UUID, List<OrderOffer>> offersPerPlayer = new HashMap<>();
 

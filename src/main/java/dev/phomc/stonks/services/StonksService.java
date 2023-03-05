@@ -10,7 +10,7 @@ import dev.phomc.stonks.offers.InstantTrade;
 import dev.phomc.stonks.offers.OrderOffer;
 import net.minecraft.server.level.ServerPlayer;
 
-public interface StonksServiceProvider {
+public interface StonksService {
 	CompletableFuture<OrderOffer> getOffer(ObjectId offerId);
 	CompletableFuture<OrderOffer[]> getOffers(UUID player);
 	CompletableFuture<Void> makeOffer(OrderOffer offer);

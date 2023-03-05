@@ -11,7 +11,7 @@ import dev.phomc.stonks.Stonks;
 import dev.phomc.stonks.bridges.MinecraftServerBridge;
 import dev.phomc.stonks.modules.CurrencyHandler;
 import dev.phomc.stonks.modules.ItemsComparator;
-import dev.phomc.stonks.services.StonksServiceProvider;
+import dev.phomc.stonks.services.StonksService;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,14 +23,14 @@ public class Market {
 
 	public final List<MarketCategory> categories = new ArrayList<>();
 	public final Map<UUID, TempPlayerData> temporaryData = new HashMap<>();
-	public final StonksServiceProvider service;
+	public final StonksService service;
 
 	protected long updateInterval = 10 * 1000; // 10 seconds before next update become available
 
 	public ItemsComparator itemsComparator = ItemsComparator.DEFAULT_COMPARATOR;
 	public CurrencyHandler currency = CurrencyHandler.DEFAULT_HANDLER;
 
-	public Market(StonksServiceProvider service) {
+	public Market(StonksService service) {
 		this.service = service;
 	}
 
@@ -73,8 +73,7 @@ public class Market {
 		});
 	}
 
-	public static Market createDefaultMarket(StonksServiceProvider service) {
-		Market market = new Market(service);
+	public static Market setupDefaults(Market market) {
 		market.categories.add(new MarketCategory()
 				.builder(e -> e
 						.setItem(Items.IRON_ORE)
@@ -102,6 +101,7 @@ public class Market {
 				.add(new MarketItem(Items.BEETROOT.getDefaultInstance()))
 				.add(new MarketItem(Items.BEEF.getDefaultInstance()))
 				.add(new MarketItem(Items.CHICKEN.getDefaultInstance())));
+
 		return market;
 	}
 
