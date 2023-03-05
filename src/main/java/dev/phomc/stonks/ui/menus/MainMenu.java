@@ -3,6 +3,7 @@ package dev.phomc.stonks.ui.menus;
 import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.MarketCategory;
 import dev.phomc.stonks.markets.MarketItem;
+import dev.phomc.stonks.ui.menus.items.ItemMenu;
 import dev.phomc.stonks.ui.menus.offers.OffersListMenu;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
@@ -32,7 +33,8 @@ public class MainMenu extends MarketMenu {
 				.addLoreLine(Component.empty().withStyle(ChatFormatting.GRAY)
 						.append(Component.literal("Click ").withStyle(ChatFormatting.GOLD))
 						.append("to sell all items in your"))
-				.addLoreLine(Component.literal("inventory").withStyle(ChatFormatting.GRAY)));
+				.addLoreLine(Component.literal("inventory").withStyle(ChatFormatting.GRAY))
+				.setCallback(this::sellAll));
 
 		setSlot(5, new GuiElementBuilder(Items.PAPER)
 				.setName(Component.literal("View offers").withStyle(ChatFormatting.YELLOW))
@@ -90,6 +92,25 @@ public class MainMenu extends MarketMenu {
 				setSlot(slot, item.buildElement());
 			}
 		}
+	}
+
+	public void sellAll() {
+		close();
+		getPlayer().sendSystemMessage(Component.literal("Selling all items...").withStyle(ChatFormatting.GRAY));
+		boolean soldOnce = false;
+
+		for (MarketCategory category : market.categories) {
+			for (MarketItem item : category.items) {
+				ItemMenu menu = new ItemMenu(market, this, player, item);
+
+				if (menu.availableForSale > 0) {
+					menu.instantSellAll();
+					soldOnce = true;
+				}
+			}
+		}
+
+		if (!soldOnce) getPlayer().sendSystemMessage(Component.literal("No items sold.").withStyle(ChatFormatting.RED));
 	}
 
 	// Internal update clock

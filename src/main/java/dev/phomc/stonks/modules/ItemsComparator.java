@@ -26,6 +26,8 @@ public interface ItemsComparator {
 	default int removeInContainers(ItemStack item, Container container, int count) {
 		for (int i = 0; i < container.getContainerSize(); i++) {
 			ItemStack is = container.getItem(i);
+			if (!isSimilar(item, is)) continue;
+
 			int toRemove = Math.min(is.getCount(), count);
 			count -= toRemove;
 			is.setCount(is.getCount() - toRemove);

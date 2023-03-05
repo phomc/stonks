@@ -16,7 +16,7 @@ import net.minecraft.world.item.Items;
 
 public class ItemMenu extends MarketMenu {
 	private MarketItem item;
-	protected int availableForSale;
+	public int availableForSale;
 	private boolean instantSold = false;
 
 	public ItemMenu(Market market, MarketMenu previousMenu, ServerPlayer player, MarketItem item) {
@@ -79,7 +79,8 @@ public class ItemMenu extends MarketMenu {
 	}
 
 	public void instantSellAll() {
-		if (instantSold) return;
+		if (availableForSale == 0) return;
+		if (instantSold) return ;
 		instantSold = true;
 
 		setSlot(20, new GuiElementBuilder(Items.GRAY_STAINED_GLASS_PANE)
@@ -94,8 +95,8 @@ public class ItemMenu extends MarketMenu {
 		market.itemsComparator.removeInContainers(item.item, getPlayer().getInventory(), availableForSale);
 		InstantTrade trade = InstantTrade.instantSell(item, availableForSale);
 
-		market.service.executeInstantTrade(trade).thenAccept(trade2 -> {
-			market.currency.send(player.getUUID(), trade2.budget).thenRun(() -> {
+		market.service.executeInstantTrade(trade).thenCompose(trade2 -> {
+			return market.currency.send(player.getUUID(), trade2.budget).thenRun(() -> {
 				setSlot(20, new GuiElementBuilder(Items.LIME_STAINED_GLASS_PANE)
 						.setName(Component.literal("Items sold!").withStyle(ChatFormatting.GREEN)));
 
