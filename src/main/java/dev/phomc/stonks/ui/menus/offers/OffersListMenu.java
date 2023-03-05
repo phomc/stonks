@@ -45,13 +45,19 @@ public class OffersListMenu extends MarketMenu {
 		drawOffers(currentPage);
 	}
 
+	private int ticked = 0;
+
 	@Override
 	public void onTick() {
-		market.updateOffersList(temporaryData, false);
+		ticked++;
 
-		if (nextUpdateTimestamp != temporaryData.nextOffersListUpdate || temporaryData.nextOffersListUpdateLock) {
-			drawOffers();
-			nextUpdateTimestamp = temporaryData.nextOffersListUpdate;
+		if (ticked >= 20) {
+			market.updateOffersList(temporaryData, false);
+
+			if (nextUpdateTimestamp != temporaryData.nextOffersListUpdate || temporaryData.nextOffersListUpdateLock) {
+				drawOffers();
+				nextUpdateTimestamp = temporaryData.nextOffersListUpdate;
+			}
 		}
 	}
 }

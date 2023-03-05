@@ -12,7 +12,6 @@ import dev.phomc.stonks.bridges.MinecraftServerBridge;
 import dev.phomc.stonks.modules.CurrencyHandler;
 import dev.phomc.stonks.modules.ItemsComparator;
 import dev.phomc.stonks.services.StonksServiceProvider;
-import dev.phomc.stonks.utils.Async;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -69,9 +68,6 @@ public class Market {
 			Stonks.LOGGER.info("Updating offers list for {}", data.playerId);
 			data.offers.clear();
 			data.offers.addAll(Arrays.asList(offers));
-		})
-		.thenCompose($_ -> Async.sleep(200)) // TODO: fake sleep, we are testing the lag thing, please remove in prod.
-		.thenRun(() -> {
 			data.nextOffersListUpdateLock = false;
 			data.nextOffersListUpdate = System.currentTimeMillis() + updateInterval;
 		});
