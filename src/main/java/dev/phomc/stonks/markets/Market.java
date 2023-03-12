@@ -10,6 +10,7 @@ import java.util.UUID;
 import dev.phomc.stonks.Stonks;
 import dev.phomc.stonks.bridges.MinecraftServerBridge;
 import dev.phomc.stonks.modules.CurrencyHandler;
+import dev.phomc.stonks.modules.ItemIdsConverter;
 import dev.phomc.stonks.modules.ItemsComparator;
 import dev.phomc.stonks.services.StonksService;
 import net.minecraft.network.chat.Component;
@@ -25,13 +26,15 @@ public class Market {
 	public final Map<UUID, TempPlayerData> temporaryData = new HashMap<>();
 	public final StonksService service;
 
-	protected long updateInterval = 10 * 1000; // 10 seconds before next update become available
+	public long updateInterval = 10 * 1000; // 10 seconds before next update become available
 
+	public ItemIdsConverter itemIds = ItemIdsConverter.DEFAULT_CONVERTER;
 	public ItemsComparator itemsComparator = ItemsComparator.DEFAULT_COMPARATOR;
 	public CurrencyHandler currency = CurrencyHandler.DEFAULT_HANDLER;
 
 	public Market(StonksService service) {
 		this.service = service;
+		this.service.onAttached(this);
 	}
 
 	public void updateQuickInfo(MarketItem item, boolean forced) {

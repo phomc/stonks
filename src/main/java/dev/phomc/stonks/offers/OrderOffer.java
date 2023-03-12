@@ -16,8 +16,11 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class OrderOffer {
+	public static final OrderOffer EMPTY = new OrderOffer(UUID.nameUUIDFromBytes("sussy baka".getBytes()), OfferType.BUY, Items.AIR.getDefaultInstance(), 0, 0, 0);
+
 	public final UUID playerId;
 	public final OfferType type;
 	public final ItemStack item;
