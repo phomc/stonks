@@ -1,16 +1,20 @@
 package dev.phomc.stonks.services;
 
+import java.io.Closeable;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.bson.types.ObjectId;
 
+import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.MarketItem;
 import dev.phomc.stonks.offers.InstantTrade;
 import dev.phomc.stonks.offers.OrderOffer;
 import net.minecraft.server.level.ServerPlayer;
 
-public interface StonksService {
+public interface StonksService extends Closeable {
+	void onAttached(Market market);
+
 	CompletableFuture<OrderOffer> getOffer(ObjectId offerId);
 	CompletableFuture<OrderOffer[]> getOffers(UUID player);
 	CompletableFuture<Void> makeOffer(OrderOffer offer);

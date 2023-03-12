@@ -1,5 +1,6 @@
 package dev.phomc.stonks.services.memory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.bson.types.ObjectId;
 
 import com.google.common.base.Preconditions;
 
+import dev.phomc.stonks.markets.Market;
 import dev.phomc.stonks.markets.MarketItem;
 import dev.phomc.stonks.modules.ItemsComparator;
 import dev.phomc.stonks.offers.InstantTrade;
@@ -28,7 +30,12 @@ public class MemoryService implements StonksService {
 	private final Map<ObjectId, OrderOffer> offers = new HashMap<>();
 	private final Map<UUID, List<OrderOffer>> offersPerPlayer = new HashMap<>();
 
-	public ItemsComparator comparator = ItemsComparator.DEFAULT_COMPARATOR;
+	private ItemsComparator comparator = ItemsComparator.DEFAULT_COMPARATOR;
+
+	@Override
+	public void onAttached(Market market) {
+		comparator = market.itemsComparator;
+	}
 
 	@Override
 	public CompletableFuture<OrderOffer> getOffer(ObjectId offerId) {
@@ -190,5 +197,10 @@ public class MemoryService implements StonksService {
 
 			item.isUpdating = false;
 		});
+	}
+
+	@Override
+	public void close() throws IOException {
+		// NO-OP; do nothing
 	}
 }
