@@ -300,7 +300,10 @@ public class MongoDBService implements StonksService {
 	@Override
 	public CompletableFuture<Void> updateProductQuickInfo(MarketItem item) {
 		long currentTime = System.currentTimeMillis();
-		CompletableFuture<Void> cf = (currentTime >= (quickInfoLastUpdate + updateInterval))? Flux.from(collection.aggregate(quickInfoAggregationPipeline))
+		boolean shouldUpdate = currentTime >= (quickInfoLastUpdate + updateInterval);
+		if (shouldUpdate) quickInfoValues.clear();
+
+		CompletableFuture<Void> cf = shouldUpdate? Flux.from(collection.aggregate(quickInfoAggregationPipeline))
 			.map(doc -> {
 				String itemId = doc.getString("_id");
 				Double averageBuy = doc.getDouble("averageBuy");
