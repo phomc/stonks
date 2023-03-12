@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'com.mojang:minecraft:1.19.4-pre3'
+    minecraft 'com.mojang:minecraft:1.19.4-rc2'
     mappings loom.officialMojangMappings()
     modImplementation 'net.fabricmc:fabric-loader:0.14.17'
 
