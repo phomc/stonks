@@ -8,7 +8,7 @@ _nahkd porting Stonks as Fabric server mod._
 By default, Stonks (this Fabric port ofc) will use memory-based service, which means all the market data will be cleared when you stop the server. To keep the data, you can configure a database service backend using envvar:
 
 ```sh
-STONKS_DATABASE=type=mongodb;host=localhost:27017;database=veryCoolDatabaseName;collection=marketData
+STONKS_DATABASE="type=mongodb;host=localhost:27017;database=veryCoolDatabaseName;collection=marketData" java -jar server.jar
 ```
 
 ### MongoDB service backend
