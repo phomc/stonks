@@ -18,7 +18,10 @@ dependencies {
     // Dependencies
     modImplementation 'net.fabricmc.fabric-api:fabric-api:0.75.1+1.19.4'
     modImplementation include('eu.pb4:sgui:1.2.1+1.19.3')
-    implementation include('org.mongodb:mongodb-driver-reactivestreams:4.9.0')
+    implementation 'org.mongodb:mongodb-driver-reactivestreams:4.9.0'
+
+    // Includes
+    include 'org.mongodb:mongodb-driver-reactivestreams:4.9.0'
 
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
