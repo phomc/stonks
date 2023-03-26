@@ -20,6 +20,9 @@ dependencies {
     modImplementation include('eu.pb4:sgui:1.2.1+1.19.3')
     implementation include('org.mongodb:mongodb-driver-reactivestreams:4.9.0')
 
+    // Includes
+    compileOnly include('io.projectreactor:reactor-core:3.5.0')
+
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 }
